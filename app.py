@@ -52,7 +52,7 @@ def getPodCount():
     return podcount
 
 def scalePod(desiredPodCount):
-    headers = {'Authorization': 'Bearer ' + + authToken, 'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'}
+    headers = {'Authorization': 'Bearer ' + authToken, 'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'}
     patchdata = '[{"op":"replace","path":"/spec/replicas","value":"' + desiredPodCount + '"}]'
     resp = requests.patch(osUrl, headers=headers, verify=False, data=patchdata)
     print('--> Scaling to ' + desiredPodCount + '. Response Status - ' + str(resp.status_code))
