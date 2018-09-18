@@ -1,0 +1,480 @@
+apiVersion: v1
+kind: Template
+metadata:
+  labels:
+    app: ${NAMESPACE}
+  name: ${NAMESPACE}-template
+objects:
+#- apiVersion: v1
+#  kind: Project
+#  metadata:
+#    labels:
+#      app: ${NAMESPACE}
+#    name: ${NAMESPACE}
+#  spec: {}
+#  status: {}
+# TEMPLATE CONFIG For Local Role
+#- apiVersion: v1
+#  kind: Role
+#  metadata:
+#    labels:
+#      app: ${NAMESPACE}
+#    name: ${NAMESPACE}-role
+#    namespace: r${NAMESPACE}
+#  rules:
+#  - apiGroups:
+#    - ""
+#    attributeRestrictions: null
+#    resources:
+#    - endpoints
+#    verbs:
+#    - get
+#    - list
+#    - update
+## TEMPLATE CONFIG For Service Account
+#- apiVersion: v1
+#  kind: ServiceAccount
+#  metadata:
+#    labels:
+#      app: ${NAMESPACE}
+#    name: ${NAMESPACE}-sa
+#    namespace: ${NAMESPACE}
+## TEMPLATE CONFIG Rolebinding
+#- apiVersion: v1
+#  kind: RoleBinding
+#  metadata:
+#    labels:
+#      app: ${NAMESPACE}
+#    name: ${NAMESPACE}-role-binding
+#    namespace: ${NAMESPACE}
+#  roleRef:
+#    name: ${NAMESPACE}-role
+#    namespace: ${NAMESPACE}
+#  subjects:
+#  - kind: ServiceAccount
+#    name: ${NAMESPACE}-sa
+#    namespace: ${NAMESPACE}
+## TEMPLATE CONFIG FOR ref-sample-app
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-sample-app
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-sample-app
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ref-sample-app:latest
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/codequester/ref-sample-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: python:latest
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: githubsecret123
+      type: GitHub
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: ${NAMESPACE}
+    name: ref-sample-app
+  spec:
+    replicas: 1
+    selector:
+      app: ${NAMESPACE}
+      deploymentconfig: ref-sample-app
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${NAMESPACE}
+          deploymentconfig: ref-sample-app
+      spec:
+        containers:
+        - image: ref-sample-app:latest
+          imagePullPolicy: Always
+          name: ref-sample-app
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}                                                                      
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        serviceAccount: ref-scaler-impl-sa
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ref-sample-app
+        from:
+          kind: ImageStreamTag
+          name: ref-sample-app:latest
+          namespace: ${NAMESPACE}
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-sample-app
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${NAMESPACE}
+      deploymentconfig: ref-sample-app
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-sample-app
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: ref-sample-app
+## TEMPLATE CONFIG FOR ref-metric-app
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ref-scaler-impl
+    name: ref-metric-app
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ref-scaler-impl
+    name: ref-metric-app
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ref-metric-app:latest
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/codequester/ref-metric-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: githubsecret123
+      type: GitHub
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: ${NAMESPACE}
+    name: ref-metric-app
+  spec:
+    replicas: 1
+    selector:
+      app: ${NAMESPACE}
+      deploymentconfig: ref-metric-app
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${NAMESPACE}
+          deploymentconfig: ref-metric-app
+      spec:
+        containers:
+        - image: ref-metric-app:latest
+          imagePullPolicy: Always
+          name: ref-metric-app
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ref-metric-app
+        from:
+          kind: ImageStreamTag
+          name: ref-metric-app:latest
+          namespace: ${NAMESPACE}
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-metric-app
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ref-scaler-impl
+      deploymentconfig: ref-metric-app
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-metric-app
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: ref-metric-app
+## TEMPLATE CONFIG FOR ref-scaler-app
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-scaler-app
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-scaler-app
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ref-scaler-app:latest
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/codequester/ref-scaler-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: python:latest
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: githubsecret123
+      type: GitHub
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: ${NAMESPACE}
+    name: ref-scaler-app
+  spec:
+    replicas: 1
+    selector:
+      app: ${NAMESPACE}
+      deploymentconfig: ref-scaler-app
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${NAMESPACE}
+          deploymentconfig: ref-scaler-app
+      spec:
+        containers:
+        - image: ref-scaler-app:latest
+          imagePullPolicy: Always
+          name: ref-scaler-app
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          env:
+          - name: SCALE_URL
+            value: https://${OS_CLUSTER_HOST}/apis/apps.openshift.io/v1/namespaces/${NAMESPACE}/deploymentconfigs/ref-sample-app/scale
+          - name: METRIC_URL
+            value: http://ref-metric-app-${NAMESPACE}.${ROUTE_SUB_DOMAIN}/getdepth
+          - name: SA_TOKEN
+            value: ${SA_TOKEN}
+          - name: SCALE_TIME_THRESHOLD_SECS
+            value: ${SCALE_TIME_THRESHOLD_SECS}
+          - name: MAX_Q_DEPTH
+            value: ${MAX_Q_DEPTH}
+          - name: MIN_POD_COUNT
+            value: ${MIN_POD_COUNT}
+          - name: MAX_POD_COUNT
+            value: ${MAX_POD_COUNT}
+          - name: SCALE_DN_COUNT
+            value: ${SCALE_DN_COUNT}
+          - name: SCALE_UP_COUNT
+            value: ${SCALE_UP_COUNT} 
+          - name: NAMESPACE
+            value: ${NAMESPACE}                                                                            
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        serviceAccount: ref-scaler-impl-sa
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ref-scaler-app
+        from:
+          kind: ImageStreamTag
+          name: ref-scaler-app:latest
+          namespace: ${NAMESPACE}
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ref-scaler-app
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${NAMESPACE}
+      deploymentconfig: ref-scaler-app
+    type: ClusterIP
+## TEMPLATE CONFIG FOR parameters
+parameters:
+- description: The number of pods that will be scaled up when the custom metric limit is reached
+  displayName: Scale up count
+  name: SCALE_UP_COUNT
+  required: true
+  value: "3"
+- description: The number of pods that will be scaled down when the application exhibits normal behavior and if there are more pods than the configure default
+  displayName: Scale down count
+  name: SCALE_DN_COUNT
+  required: true
+  value: "2"
+- description: Maximum pod count when scaling up.
+  displayName: Max pod count
+  name: MAX_POD_COUNT
+  required: true
+  value: "10"
+- description: Minimum pod count when scaling down.
+  displayName: Min pod count
+  name: MIN_POD_COUNT
+  required: true
+  value: "2"
+- description: Maximum queue depth. Pods will be scaled up if queue depth reaches the max values for a set period of time.
+  displayName: Max queue depth
+  name: MAX_Q_DEPTH
+  required: true
+  value: "500"
+- description: The period of time (in secs) the app will wait to scaling up or down based on the queue depth 
+  displayName: Scale time threshold
+  name: SCALE_TIME_THRESHOLD_SECS
+  required: true
+  value: "30"
+- description: The routing sub domain as configured by the cluster administrator
+  displayName: Routing sub domain
+  name: ROUTE_SUB_DOMAIN
+  required: true
+  value: apps.na39.openshift.opentlc.com
+- description: The openshift cluster host
+  displayName: Openshift Cluster Host
+  name: OS_CLUSTER_HOST
+  required: true
+  value: master.na39.openshift.opentlc.com
+- description: The Auth token for the service account
+  displayName: Service account token
+  name: SA_TOKEN
+  required: true
+- description: The name of the Project 
+  displayName: Project name
+  name: NAMESPACE
+  required: true

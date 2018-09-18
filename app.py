@@ -6,12 +6,12 @@ import datetime
 import os
 
 # Parameters that will be passed.
-scaleUpCount = os.getenv('SCALE_UP_COUNT', 3)
-scaleDownCount = os.getenv('SCALE_DN_COUNT', 2)
-maxPodCount = os.getenv('MAX_POD_COUNT', 10)
-minPodCount = os.getenv('MIN_POD_COUNT', 2)
-depthThreshold = os.getenv('MAX_Q_DEPTH', 520)
-timeThreshold = os.getenv('SCALE_TIME_THRESHOLD_SECS', 30) 
+scaleUpCount = int(os.getenv('SCALE_UP_COUNT'))
+scaleDownCount = int(os.getenv('SCALE_DN_COUNT'))
+maxPodCount = int(os.getenv('MAX_POD_COUNT'))
+minPodCount = int(os.getenv('MIN_POD_COUNT'))
+depthThreshold = int(os.getenv('MAX_Q_DEPTH'))
+timeThreshold = int(os.getenv('SCALE_TIME_THRESHOLD_SECS'))
 osUrl = os.getenv('SCALE_URL')
 metricUrl = os.getenv('METRIC_URL')
 authToken = os.getenv('SA_TOKEN')
