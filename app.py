@@ -83,6 +83,7 @@ def isScaleDown(currentPodCount):
 
 
 def startMonitor():
+    time.sleep(50)
     while True:
         global lastBreachTime
         global lastNonBreachTime
