@@ -50,12 +50,10 @@ App that monitors the metric app and scales the sample app.
   displayName: Routing sub domain
   name: ROUTE_SUB_DOMAIN
   required: true
-  value: apps.na39.openshift.opentlc.com
 - description: The openshift cluster host
   displayName: Openshift Cluster Host
   name: OS_CLUSTER_HOST
   required: true
-  value: master.na39.openshift.opentlc.com
 - description: The Auth token for the service account
   displayName: Service account token
   name: SA_TOKEN
