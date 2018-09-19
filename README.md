@@ -7,7 +7,7 @@ App that monitors the metric app and scales the sample app.
 
 `oc process -f ref-scaler-impl.yaml -p NAMESPACE=ref-scaler-impl -p OS_CLUSTER_HOST=<The Cluster Host> -p ROUTE_SUB_DOMAIN=<The apps Sub Domain>  | oc create -f -`
 
-*OS_CLUSTER_HOST* and *ROUTE_SUB_DOMAIN* needs to be changed based on the deployment context. for e.g `-p OS_CLUSTER_HOST=master.na39.openshift.opentlc.com -p ROUTE_SUB_DOMAIN=apps.na39.openshift.opentlc.com
+*OS_CLUSTER_HOST* and *ROUTE_SUB_DOMAIN* needs to be changed based on the deployment context. for e.g `-p OS_CLUSTER_HOST=master.na39.openshift.opentlc.com -p ROUTE_SUB_DOMAIN=apps.na39.openshift.opentlc.com`
 
 ## Parameter List
 ```
