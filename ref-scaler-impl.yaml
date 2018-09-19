@@ -14,46 +14,47 @@ objects:
 #  spec: {}
 #  status: {}
 # TEMPLATE CONFIG For Local Role
-#- apiVersion: v1
-#  kind: Role
-#  metadata:
-#    labels:
-#      app: ${NAMESPACE}
-#    name: ${NAMESPACE}-role
-#    namespace: r${NAMESPACE}
-#  rules:
-#  - apiGroups:
-#    - ""
-#    attributeRestrictions: null
-#    resources:
-#    - endpoints
-#    verbs:
-#    - get
-#    - list
-#    - update
+- apiVersion: v1
+  kind: Role
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ${NAMESPACE}-role
+    namespace: ${NAMESPACE}
+  rules:
+  - apiGroups:
+    - apps.openshift.io
+    attributeRestrictions: null
+    resources:
+    - deploymentconfigs/scale 
+    verbs:
+    - create
+    - get
+    - list
+    - update
 ## TEMPLATE CONFIG For Service Account
-#- apiVersion: v1
-#  kind: ServiceAccount
-#  metadata:
-#    labels:
-#      app: ${NAMESPACE}
-#    name: ${NAMESPACE}-sa
-#    namespace: ${NAMESPACE}
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ${NAMESPACE}-sa
+    namespace: ${NAMESPACE}
 ## TEMPLATE CONFIG Rolebinding
-#- apiVersion: v1
-#  kind: RoleBinding
-#  metadata:
-#    labels:
-#      app: ${NAMESPACE}
-#    name: ${NAMESPACE}-role-binding
-#    namespace: ${NAMESPACE}
-#  roleRef:
-#    name: ${NAMESPACE}-role
-#    namespace: ${NAMESPACE}
-#  subjects:
-#  - kind: ServiceAccount
-#    name: ${NAMESPACE}-sa
-#    namespace: ${NAMESPACE}
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+    name: ${NAMESPACE}-role-binding
+    namespace: ${NAMESPACE}
+  roleRef:
+    name: ${NAMESPACE}-role
+    namespace: ${NAMESPACE}
+  subjects:
+  - kind: ServiceAccount
+    name: ${NAMESPACE}-sa
+    namespace: ${NAMESPACE}
 ## TEMPLATE CONFIG FOR ref-sample-app
 - apiVersion: v1
   kind: ImageStream
@@ -470,10 +471,10 @@ parameters:
   name: OS_CLUSTER_HOST
   required: true
   value: master.na39.openshift.opentlc.com
-- description: The Auth token for the service account
-  displayName: Service account token
-  name: SA_TOKEN
-  required: true
+#- description: The Auth token for the service account
+#  displayName: Service account token
+#  name: SA_TOKEN
+#  required: true
 - description: The name of the Project 
   displayName: Project name
   name: NAMESPACE

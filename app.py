@@ -14,11 +14,12 @@ depthThreshold = int(os.getenv('MAX_Q_DEPTH'))
 timeThreshold = int(os.getenv('SCALE_TIME_THRESHOLD_SECS'))
 osUrl = os.getenv('SCALE_URL')
 metricUrl = os.getenv('METRIC_URL')
-authToken = os.getenv('SA_TOKEN')
+#authToken = os.getenv('SA_TOKEN')
 
 # Global variables
 lastBreachTime = None
 lastNonBreachTime = None
+authToken = None
 
 # Function to get the elapsed time since the last breach
 def getBreachElapsedTime():
@@ -81,9 +82,16 @@ def isScaleDown(currentPodCount):
     else:
         return False
 
+def setToken():
+  global authToken
+  tokenFile = open("/var/run/secrets/kubernetes.io/serviceaccount/token","r")
+  authToken = tokenFile.read()
+  tokenFile.close()
 
 def startMonitor():
+    # Need a better way. This is just to give time for other apps to start up. Can use readiness probe???
     time.sleep(50)
+    setToken()
     while True:
         global lastBreachTime
         global lastNonBreachTime
