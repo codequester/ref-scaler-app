@@ -14,24 +14,24 @@ objects:
 #  spec: {}
 #  status: {}
 # TEMPLATE CONFIG For Local Role
-- apiVersion: v1
-  kind: Role
-  metadata:
-    labels:
-      app: ${NAMESPACE}
-    name: ${NAMESPACE}-role
-    namespace: ${NAMESPACE}
-  rules:
-  - apiGroups:
-    - apps.openshift.io
-    attributeRestrictions: null
-    resources:
-    - deploymentconfigs/scale 
-    verbs:
-    - create
-    - get
-    - list
-    - update
+#- apiVersion: v1
+#  kind: Role
+#  metadata:
+#    labels:
+#      app: ${NAMESPACE}
+#    name: ${NAMESPACE}-role
+#    namespace: ${NAMESPACE}
+#  rules:
+#  - apiGroups:
+#    - apps.openshift.io
+#    attributeRestrictions: null
+#    resources:
+#    - deploymentconfigs/scale 
+#    verbs:
+#    - create
+#    - get
+#    - list
+#    - update
 ## TEMPLATE CONFIG For Service Account
 - apiVersion: v1
   kind: ServiceAccount
@@ -49,8 +49,8 @@ objects:
     name: ${NAMESPACE}-role-binding
     namespace: ${NAMESPACE}
   roleRef:
-    name: ${NAMESPACE}-role
-    namespace: ${NAMESPACE}
+    name: edit
+#    namespace: ${NAMESPACE}
   subjects:
   - kind: ServiceAccount
     name: ${NAMESPACE}-sa
