@@ -471,10 +471,6 @@ parameters:
   name: OS_CLUSTER_HOST
   required: true
   value: master.na39.openshift.opentlc.com
-#- description: The Auth token for the service account
-#  displayName: Service account token
-#  name: SA_TOKEN
-#  required: true
 - description: The name of the Project 
   displayName: Project name
   name: NAMESPACE

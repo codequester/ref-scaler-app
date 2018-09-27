@@ -14,7 +14,6 @@ depthThreshold = int(os.getenv('MAX_Q_DEPTH'))
 timeThreshold = int(os.getenv('SCALE_TIME_THRESHOLD_SECS'))
 osUrl = os.getenv('SCALE_URL')
 metricUrl = os.getenv('METRIC_URL')
-#authToken = os.getenv('SA_TOKEN')
 
 # Global variables
 lastBreachTime = None
